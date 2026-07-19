@@ -1,74 +1,123 @@
 /**
- * Papelería Roger - Advanced Corporate Architecture Engine
+ * Papelería Roger - Advanced Corporate Architecture Engine (Supabase Cloud Version)
  */
 
-// 1. DATA ACCESS LAYER (Encapsulación de Base de Datos)
+// 1. DATA ACCESS LAYER (Conexión Directa a la Nube)
+// Pon tus llaves de conexión obtenidas en el panel aquí:
+const SUPABASE_URL = "https://oxrzpgeifttrzznxxmjl.supabase.co"; 
+const SUPABASE_ANON_KEY = "PEGA_AQUÍ_LA_LLAVE_LARGA_QUE_COPIASTE"; 
+
+// Inicializar cliente global de Supabase (requiere el script en tu HTML)
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
 class DatabaseService {
-    constructor(dbName, version) {
-        this.dbName = dbName;
-        this.version = version;
-        this.db = null;
+    constructor() {
+        // Mantenemos la estructura para no romper la compatibilidad con las otras capas
+        this.db = supabaseClient;
     }
 
-    connect() {
-        return new Promise((resolve, reject) => {
-            const request = indexedDB.open(this.dbName, this.version);
-            request.onerror = () => reject('Fallo de conexión a IndexedDB.');
-            request.onsuccess = (e) => { this.db = e.target.result; resolve(); };
-            request.onupgradeneeded = (e) => {
-                const database = e.target.result;
-                const stores = ['articulos', 'ventas', 'gastos', 'creditos'];
-                stores.forEach(store => {
-                    if (!database.objectStoreNames.contains(store)) {
-                        database.createObjectStore(store, { 
-                            keyPath: store === 'articulos' ? 'barcode' : 'id', 
-                            autoIncrement: store !== 'articulos' 
-                        });
-                    }
-                });
-            };
-        });
+    async connect() {
+        // En Supabase la conexión es HTTP directa, así que verificamos acceso básico
+        try {
+            const { data, error } = await this.db.from('inventario').select('count', { count: 'exact', head: true });
+            if (error) throw error;
+            console.log("🚀 Sincronización exitosa con el servidor en la nube de Supabase.");
+            return true;
+        } catch (err) {
+            console.error("Fallo de conexión a la API de Supabase:", err);
+            throw new Error('Error al conectar con el servidor en la nube.');
+        }
     }
 
-    getAll(storeName) {
-        return new Promise((resolve) => {
-            const transaction = this.db.transaction([storeName], 'readonly');
-            const request = transaction.objectStore(storeName).getAll();
-            request.onsuccess = () => resolve(request.result);
-        });
+    // Métodos específicos para la tabla 'inventario' vinculada a Supabase
+    async getAllItems() {
+        const { data, error } = await this.db
+            .from('inventario')
+            .select('*')
+            .order('nombre', { ascending: true });
+        
+        if (error) { console.error(error); return []; }
+        
+        // Mapeamos los nombres de columnas de Supabase a los objetos de tu UI
+        return data.map(row => ({
+            barcode: row.id.toString(), // Usamos el ID de la base de datos como código
+            name: row.nombre,
+            category: "Papelería", // Valor por defecto
+            price: parseFloat(row.precio),
+            stock: parseInt(row.cantidad, 10),
+            minStock: 5 // Control interno local
+        }));
     }
 
-    save(storeName, item) {
-        return new Promise((resolve) => {
-            const transaction = this.db.transaction([storeName], 'readwrite');
-            transaction.objectStore(storeName).put(item).onsuccess = () => resolve();
-        });
+    async saveItem(item) {
+        // Estructuramos el objeto tal cual lo pide la tabla en Supabase
+        const dbRow = {
+            nombre: item.name,
+            precio: item.price,
+            cantidad: item.stock
+        };
+
+        // Si el código es numérico, significa que estamos editando una fila existente
+        if (item.barcode && !item.barcode.startsWith('ART-') && !isNaN(item.barcode)) {
+            const { error } = await this.db
+                .from('inventario')
+                .update(dbRow)
+                .eq('id', parseInt(item.barcode, 10));
+            if (error) console.error("Error al actualizar en la nube:", error);
+        } else {
+            // Si es un artículo nuevo, lo insertamos y dejamos que el ID sea autoincrementable
+            const { error } = await this.db
+                .from('inventario')
+                .insert([dbRow]);
+            if (error) console.error("Error al insertar en la nube:", error);
+        }
     }
 
-    delete(storeName, key) {
-        return new Promise((resolve) => {
-            const transaction = this.db.transaction([storeName], 'readwrite');
-            transaction.objectStore(storeName).delete(key).onsuccess = () => resolve();
-        });
+    async deleteItem(id) {
+        const { error } = await this.db
+            .from('inventario')
+            .delete()
+            .eq('id', parseInt(id, 10));
+        if (error) console.error("Error al eliminar de la nube:", error);
+    }
+
+    // --- MANTENIMIENTO LOCAL MEDIANTE LOCALSTORAGE PARA FLUJO DE CAJA Y FIADOS ---
+    // (Para no alterar las otras tablas de gastos/créditos locales por ahora)
+    async getAll(storeName) {
+        return JSON.parse(localStorage.getItem(`roger_local_${storeName}`)) || [];
+    }
+
+    async save(storeName, item) {
+        const list = await this.getAll(storeName);
+        if (!item.id) item.id = Date.now();
+        const index = list.findIndex(i => i.id === item.id);
+        if (index > -1) list[index] = item; else list.push(item);
+        localStorage.setItem(`roger_local_${storeName}`, JSON.stringify(list));
+    }
+
+    async delete(storeName, key) {
+        let list = await this.getAll(storeName);
+        list = list.filter(i => i.id !== key);
+        localStorage.setItem(`roger_local_${storeName}`, JSON.stringify(list));
     }
 }
 
-// 2. CORE DOMAIN BUSINESS SERVICES (Reglas de Negocio)
+// 2. CORE DOMAIN BUSINESS SERVICES (Reglas de Negocio Adaptadas)
 class InventoryService {
     constructor(dbService) {
         this.db = dbService;
     }
 
     async fetchItems() {
-        return await this.db.getAll('articulos');
+        return await this.db.getAllItems();
     }
 
     async persistItem(item) {
-        await this.db.save('articulos', item);
+        await this.db.saveItem(item);
     }
 
     async removeItem(barcode) {
-        await this.db.delete('articulos', barcode);
+        await this.db.deleteItem(barcode);
     }
 }
 
@@ -105,7 +154,7 @@ class SalesService {
 // 3. APPLICATION ORCHESTRATOR & UI MEDIATOR (Controlador Central)
 class AppEngine {
     constructor() {
-        this.db = new DatabaseService('PapeleriaRogerDB', 3);
+        this.db = new DatabaseService();
         this.inventory = new InventoryService(this.db);
         this.sales = new SalesService(this.db);
         this.cachedItems = [];
@@ -120,6 +169,7 @@ class AppEngine {
             this.renderCartView();
         } catch (error) {
             console.error("Critical Engine Boot Exception:", error);
+            this.toast('Error crítico al conectar a la nube.', true);
         }
     }
 
@@ -140,7 +190,7 @@ class AppEngine {
             e.preventDefault();
             if (!e.target.checkValidity()) return this.toast('Completa los campos correctamente.', true);
 
-            let barcode = document.getElementById('barcode').value.trim() || `ART-${Math.floor(1000 + Math.random() * 9000)}`;
+            let barcode = document.getElementById('product-id').value || '';
             const item = {
                 barcode,
                 name: document.getElementById('name').value.trim(),
@@ -150,7 +200,7 @@ class AppEngine {
                 minStock: parseInt(document.getElementById('min-stock').value, 10)
             };
             await this.inventory.persistItem(item);
-            this.toast('Artículo guardado exitosamente.');
+            this.toast('Artículo guardado exitosamente en la nube.');
             e.target.reset();
             document.getElementById('product-id').value = '';
             document.getElementById('barcode').disabled = false;
@@ -222,7 +272,7 @@ class AppEngine {
             this.renderCreditsTable();
         });
 
-        // Top actions
+        // Import / Export Lógica Local Reutilizada
         document.getElementById('btn-export').addEventListener('click', () => {
             const blob = new Blob([JSON.stringify(this.cachedItems, null, 2)], { type: 'application/json' });
             const a = document.createElement('a');
@@ -239,8 +289,8 @@ class AppEngine {
             reader.onload = async (evt) => {
                 try {
                     const items = JSON.parse(evt.target.result);
-                    for (const item of items) { if(item.barcode) await this.db.save('articulos', item); }
-                    this.toast('Ecosistema restaurado correctamente.');
+                    for (const item of items) { await this.inventory.persistItem(item); }
+                    this.toast('Ecosistema restaurado e inyectado a la nube.');
                     this.cachedItems = await this.inventory.fetchItems();
                     this.renderInventoryTable();
                 } catch { this.toast('Fichero de datos corrupto.', true); }
@@ -278,7 +328,7 @@ class AppEngine {
             if (item.stock === 0) badge = 'stock-empty';
             else if (item.stock <= item.minStock) badge = 'stock-low';
             return `<tr>
-                <td><code>${this.escape(item.barcode)}</code></td>
+                <td><code>ID-${this.escape(item.barcode)}</code></td>
                 <td><strong>${this.escape(item.name)}</strong></td>
                 <td>${this.escape(item.category)}</td>
                 <td>$${item.price.toFixed(2)}</td>
@@ -290,7 +340,6 @@ class AppEngine {
             </tr>`;
         }).join('');
 
-        // Dynamic element binding via DOM query to bypass global namespace polluting
         tbody.querySelectorAll('.btn-edit-trigger').forEach(b => b.addEventListener('click', (e) => this.loadEdit(e.target.dataset.barcode)));
         tbody.querySelectorAll('.btn-delete-trigger').forEach(b => b.addEventListener('click', (e) => this.deleteProduct(e.target.dataset.barcode)));
     }
@@ -298,8 +347,8 @@ class AppEngine {
     loadEdit(barcode) {
         const item = this.cachedItems.find(i => i.barcode === barcode);
         if (!item) return;
-        document.getElementById('product-id').value = item.barcode;
-        document.getElementById('barcode').value = item.barcode;
+        document.getElementById('product-id').value = item.barcode; // Guardamos el ID real de Supabase
+        document.getElementById('barcode').value = `ID-${item.barcode}`;
         document.getElementById('barcode').disabled = true; 
         document.getElementById('name').value = item.name;
         document.getElementById('category').value = item.category;
@@ -311,7 +360,7 @@ class AppEngine {
     }
 
     async deleteProduct(barcode) {
-        if (!confirm('¿Desea dar de baja este artículo?')) return;
+        if (!confirm('¿Desea dar de baja este artículo en la nube?')) return;
         await this.inventory.removeItem(barcode);
         this.toast('Registro eliminado.');
         this.cachedItems = await this.inventory.fetchItems();
@@ -357,13 +406,13 @@ class AppEngine {
                 const stockItem = this.cachedItems.find(i => i.barcode === item.barcode);
                 if (stockItem) {
                     stockItem.stock = Math.max(0, stockItem.stock - item.qty);
-                    await this.inventory.persistItem(stockItem);
+                    await this.inventory.persistItem(stockItem); // Actualiza stock directo en Supabase
                 }
             }
         }
 
         await this.db.save('ventas', { date: new Date().toISOString(), total: this.sales.getCartTotal(), itemsCount: this.sales.cart.length });
-        this.toast('Venta procesada e inventario sincronizado.');
+        this.toast('Venta procesada e inventario sincronizado en la nube.');
         this.sales.clearCart();
         document.getElementById('cash-received').value = '';
         this.cachedItems = await this.inventory.fetchItems();
@@ -444,6 +493,7 @@ class AppEngine {
 
     toast(msg, isError = false) {
         const el = document.getElementById('toast');
+        if(!el) return alert(msg); // Fallback por si no encuentra el contenedor en el DOM
         el.textContent = msg;
         el.style.borderLeft = isError ? '4px solid var(--danger)' : '4px solid var(--success)';
         el.classList.add('show');
