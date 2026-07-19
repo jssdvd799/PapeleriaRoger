@@ -201,21 +201,29 @@
 
         .quick-services {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
             gap: 0.5rem;
             margin-bottom: 1rem;
+            max-height: 380px;
+            overflow-y: auto;
+            padding-right: 5px;
         }
 
         .btn-quick {
             background: #edf2f7;
             color: var(--text-main);
-            padding: 0.5rem;
+            padding: 0.6rem;
             font-size: 0.85rem;
             font-weight: bold;
             border: 1px solid var(--border);
             border-radius: 6px;
             cursor: pointer;
             text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 2px;
         }
         .btn-quick:hover { background: #e2e8f0; }
 
@@ -359,10 +367,25 @@
                     <h2>Accesos Rápidos (Servicios)</h2>
                     <p style="font-size: 0.85rem; margin-bottom: 0.8rem; color: var(--text-muted);">Añade al ticket con un solo clic:</p>
                     <div class="quick-services">
-                        <button class="btn-quick" onclick="saleManager.addQuickService('Copia B/N', 2.00)">📄 Copia B/N ($2)</button>
-                        <button class="btn-quick" onclick="saleManager.addQuickService('Copia Color', 8.00)">🌈 Copia Col ($8)</button>
-                        <button class="btn-quick" onclick="saleManager.addQuickService('Impresión CURP', 15.00)">🆔 CURP ($15)</button>
-                        <button class="btn-quick" onclick="saleManager.addQuickService('Hojas Sueltas Bond', 1.00)">📝 Hoja Bond ($1)</button>
+                        <!-- Servicios cargados desde el Excel -->
+                        <button class="btn-quick" onclick="saleManager.addQuickService('Copias Tamaño Carta B/N', 2.00)">📄 Copia Carta B/N <span>$2.00</span></button>
+                        <button class="btn-quick" onclick="saleManager.addQuickService('Copias Tamaño Oficio B/N', 2.50)">📄 Copia Oficio B/N <span>$2.50</span></button>
+                        <button class="btn-quick" onclick="saleManager.addQuickService('Copia Tamaño Carta Color', 10.00)">🌈 Copia Carta Color <span>$10.00</span></button>
+                        <button class="btn-quick" onclick="saleManager.addQuickService('Copias Tamaño Oficio Color', 12.00)">🌈 Copia Oficio Color <span>$12.00</span></button>
+                        <button class="btn-quick" onclick="saleManager.addQuickService('Impresión Tamaño Carta B/N', 2.00)">🖨️ Imp. Carta B/N <span>$2.00</span></button>
+                        <button class="btn-quick" onclick="saleManager.addQuickService('Impresión Tamaño Carta Color', 10.00)">🌈 Imp. Carta Color <span>$10.00</span></button>
+                        <button class="btn-quick" onclick="saleManager.addQuickService('Impresión Tamaño Oficio Color', 12.00)">🌈 Imp. Oficio Color <span>$12.00</span></button>
+                        <button class="btn-quick" onclick="saleManager.addQuickService('Imp. Carta Couche Opalina/Adhesiva B/N', 20.00)">📄 Imp. Opalina B/N <span>$20.00</span></button>
+                        <button class="btn-quick" onclick="saleManager.addQuickService('Tabloide a Color (Couche/Adhesivo)', 30.00)">📐 Tabloide Color <span>$30.00</span></button>
+                        <button class="btn-quick" onclick="saleManager.addQuickService('Impresión Doble Carta B/N', 15.00)">🖨️ Imp. Doble Carta B/N <span>$15.00</span></button>
+                        <button class="btn-quick" onclick="saleManager.addQuickService('Impresión Doble Carta Color', 20.00)">🌈 Imp. Doble Carta Color <span>$20.00</span></button>
+                        <button class="btn-quick" onclick="saleManager.addQuickService('Sacar CURP', 20.00)">🆔 Sacar CURP <span>$20.00</span></button>
+                        <button class="btn-quick" onclick="saleManager.addQuickService('Sacar otros servicios / Citas', 20.00)">📅 Citas / Otros Serv. <span>$20.00</span></button>
+                        <button class="btn-quick" onclick="saleManager.addQuickService('Escanear documento (c/u)', 6.00)">📑 Escanear Doc <span>$6.00</span></button>
+                        <button class="btn-quick" onclick="saleManager.addQuickService('Consulta Internet', 10.00)">🌐 Consulta Internet <span>$10.00</span></button>
+                        <button class="btn-quick" onclick="saleManager.addQuickService('Elaboración de cartas o documentos', 20.00)">📝 Elaboración Docs <span>$20.00</span></button>
+                        <button class="btn-quick" onclick="saleManager.addQuickService('Elaboración de cualquier trabajo', 60.00)">💻 Elaboración Trabajo <span>$60.00</span></button>
+                        <button class="btn-quick" onclick="saleManager.addQuickService('Hojas Sueltas Bond', 1.00)">📝 Hoja Bond <span>$1.00</span></button>
                     </div>
 
                     <div class="form-group" style="margin-top: 1.5rem;">
@@ -438,7 +461,7 @@
                         </form>
                     </section>
 
-                    <!-- NUEVA SECCIÓN DE CONTROL DE FIADO (A LA IZQUIERDA) -->
+                    <!-- SECCIÓN DE CONTROL DE FIADO -->
                     <section class="card">
                         <h2>Registrar Persona que pide Fiado</h2>
                         <form id="credit-form" onsubmit="creditManager.saveCredit(event)">
@@ -523,7 +546,7 @@
 
     <script>
         const DB_NAME = 'PapeleriaRogerDB';
-        const DB_VERSION = 3; // Subimos versión para el nuevo almacén de créditos
+        const DB_VERSION = 3; 
         let db;
 
         const dbCore = {
@@ -929,7 +952,6 @@
             }
         };
 
-        // NUEVA LOGICA: GESTIÓN DE CRÉDITOS Y FIADOS
         const creditManager = {
             async saveCredit(e) {
                 e.preventDefault();
@@ -971,19 +993,14 @@
 
             async liquidarCredito(id, name, total) {
                 if (confirm(`¿Confirmas que ${name} ya pagó la cantidad de $${total.toFixed(2)}?`)) {
-                    // 1. Lo guardamos en Ventas para que entre el dinero en efectivo hoy
                     await dbCore.save('ventas', {
                         date: new Date().toISOString(),
                         total: total,
                         concept: `Pago de deuda - ${name}`,
                         itemsCount: 1
                     });
-                    
-                    // 2. Lo borramos de la lista de deudores
                     await dbCore.delete('creditos', id);
                     uiManager.showToast('¡Cuenta pagada! El dinero entró a caja.');
-                    
-                    // 3. Refrescar datos en pantalla
                     this.renderCredits();
                     cajaManager.renderCorte();
                 }
