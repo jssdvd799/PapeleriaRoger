@@ -5,7 +5,12 @@
 // 1. DATA ACCESS LAYER (Conexión Directa a la Nube)
 // Pon tus llaves de conexión obtenidas en el panel aquí:
 const SUPABASE_URL = "https://oxrzpgeifttrzznxxmjl.supabase.co"; 
-const SUPABASE_ANON_KEY = "PEGA_AQUÍ_LA_LLAVE_LARGA_QUE_COPIASTE"; 
+const SUPABASE_ANON_KEY = "sb_publishable_tCQX-_fg3E7YBvOOZK3jgA_ynKHe-SR"; 
+
+import { createClient } from '@supabase/supabase-js'
+const supabaseUrl = 'https://oxrzpgeifttrzznxxmjl.supabase.co'
+const supabaseKey = process.env.SUPABASE_KEY
+const supabase = createClient(supabaseUrl, supabaseKey)
 
 // Inicializar cliente global de Supabase (requiere el script en tu HTML)
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
