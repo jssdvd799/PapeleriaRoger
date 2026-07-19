@@ -4,366 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Papelería Roger - Sistema de Inventario y Caja</title>
-    <style>
-        :root {
-            --bg-primary: #f4f6f9;
-            --surface: #ffffff;
-            --text-main: #2d3748;
-            --text-muted: #718096;
-            --primary: #3182ce;
-            --primary-hover: #2b6cb0;
-            --success: #38a169;
-            --danger: #e53e3e;
-            --warning: #dd6b20;
-            --border: #e2e8f0;
-            --radius: 8px;
-            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
-        body {
-            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background-color: var(--bg-primary);
-            color: var(--text-main);
-            line-height: 1.5;
-            padding: 1rem;
-        }
-
-        .container {
-            max-width: 1600px;
-            margin: 0 auto;
-        }
-
-        /* HEADER RESPONSIVO */
-        header {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-            margin-bottom: 1.5rem;
-            padding-bottom: 1.2rem;
-            border-bottom: 2px solid var(--border);
-        }
-
-        header .brand {
-            text-align: center;
-        }
-
-        header .actions-top {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 0.5rem;
-            width: 100%;
-        }
-
-        h1 { font-size: 1.6rem; color: var(--primary); }
-        h2 { font-size: 1.2rem; margin-bottom: 1rem; }
-
-        /* TABS RESPONSIVOS CON SCROLL LATERAL EN MÓVILES */
-        .nav-tabs {
-            display: flex;
-            gap: 0.5rem;
-            margin-bottom: 1.5rem;
-            overflow-x: auto;
-            white-space: nowrap;
-            padding-bottom: 5px;
-            -webkit-overflow-scrolling: touch;
-            scrollbar-width: thin;
-        }
-
-        .tab-btn {
-            padding: 0.7rem 1.2rem;
-            background: #e2e8f0;
-            border: none;
-            border-radius: var(--radius);
-            cursor: pointer;
-            font-weight: 600;
-            color: var(--text-main);
-            flex-shrink: 0;
-            font-size: 0.95rem;
-        }
-
-        .tab-btn.active {
-            background: var(--primary);
-            color: white;
-        }
-
-        .tab-content {
-            display: none;
-        }
-
-        .tab-content.active {
-            display: block;
-        }
-
-        /* GRIDS ADAPTATIVOS (MOBILE FIRST) */
-        .dashboard-grid {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 1rem;
-        }
-
-        .card {
-            background: var(--surface);
-            padding: 1.2rem;
-            border-radius: var(--radius);
-            box-shadow: var(--shadow);
-            margin-bottom: 1rem;
-        }
-
-        .form-group {
-            margin-bottom: 1.25rem;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-weight: 600;
-            font-size: 0.9rem;
-        }
-
-        input, select {
-            width: 100%;
-            padding: 0.75rem;
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            font-size: 1rem;
-            transition: border-color 0.2s;
-            background-color: #fff;
-        }
-
-        input:focus, select:focus {
-            outline: none;
-            border-color: var(--primary);
-        }
-
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 100%;
-            padding: 0.8rem;
-            background-color: var(--primary);
-            color: white;
-            border: none;
-            border-radius: var(--radius);
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background 0.2s;
-            text-align: center;
-        }
-
-        .btn:hover { background-color: var(--primary-hover); }
-        .btn-danger { background-color: var(--danger); }
-        .btn-danger:hover { background-color: #c53030; }
-        .btn-secondary { background-color: #718096; }
-        .btn-secondary:hover { background-color: #4a5568; }
-        .btn-success { background-color: var(--success); }
-        .btn-success:hover { background-color: #2f855a; }
-
-        /* BUSCADOR RESPONSIVO */
-        .search-bar {
-            margin-bottom: 1.5rem;
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 0.75rem;
-        }
-
-        /* CONTENEDOR ELÁSTICO DE TABLAS */
-        .table-container {
-            width: 100%;
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            margin-bottom: 1rem;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            text-align: left;
-            min-width: 600px; /* Previene que se aplaste en pantallas muy chicas */
-        }
-
-        th, td {
-            padding: 0.8rem 1rem;
-            border-bottom: 1px solid var(--border);
-            font-size: 0.95rem;
-        }
-
-        th {
-            background-color: var(--bg-primary);
-            font-weight: 600;
-        }
-
-        tr:hover { background-color: #f7fafc; }
-
-        .stock-badge {
-            display: inline-block;
-            padding: 0.25rem 0.5rem;
-            border-radius: 4px;
-            font-size: 0.85rem;
-            font-weight: bold;
-        }
-
-        .stock-normal { background-color: #c6f6d5; color: #22543d; }
-        .stock-low { background-color: #feebc8; color: #744210; }
-        .stock-empty { background-color: #fed7d7; color: #742a2a; }
-
-        .actions {
-            display: flex;
-            gap: 0.5rem;
-            flex-wrap: wrap;
-        }
-
-        .btn-action {
-            padding: 0.4rem 0.8rem;
-            font-size: 0.85rem;
-            border-radius: 4px;
-            width: auto;
-        }
-
-        /* REJILLA DE SERVICIOS ADAPTATIVA */
-        .quick-services {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-            gap: 0.6rem;
-            margin-bottom: 1rem;
-            max-height: 400px;
-            overflow-y: auto;
-            padding-right: 5px;
-        }
-
-        .btn-quick {
-            background: #edf2f7;
-            color: var(--text-main);
-            padding: 0.8rem 0.5rem;
-            font-size: 0.85rem;
-            font-weight: bold;
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            cursor: pointer;
-            text-align: center;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 4px;
-            min-height: 75px;
-        }
-        .btn-quick:hover { background: #e2e8f0; }
-
-        .cart-box {
-            background: #f7fafc;
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            padding: 1.2rem;
-            margin-top: 1rem;
-        }
-
-        .toast {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            left: 20px;
-            background: #2d3748;
-            color: white;
-            padding: 1rem 1.5rem;
-            border-radius: var(--radius);
-            box-shadow: var(--shadow);
-            transform: translateY(100px);
-            opacity: 0;
-            transition: all 0.3s;
-            z-index: 1000;
-            text-align: center;
-        }
-
-        .toast.show {
-            transform: translateY(0);
-            opacity: 1;
-        }
-
-        /* REJILLA DE CORTE DE CAJA */
-        .corte-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-            gap: 1rem;
-            margin-bottom: 1.5rem;
-        }
-        
-        .corte-card {
-            background: #edf2f7;
-            margin: 0;
-            padding: 1rem;
-            border-radius: var(--radius);
-        }
-
-        /* ----------------------------------------------------
-           MEDIA QUERIES PARA ADAPTACIÓN A PANTALLAS MEDIANAS/GRANDES (Tablets, Laptops, PCs, TVs)
-        ---------------------------------------------------- */
-        
-        /* Tablets hacia arriba (>= 600px) */
-        @media (min-width: 600px) {
-            header .actions-top {
-                grid-template-columns: repeat(3, 1fr);
-            }
-            .search-bar {
-                grid-template-columns: 1fr auto;
-            }
-            .toast {
-                left: auto;
-                max-width: 350px;
-            }
-        }
-
-        /* Laptops y PCs de Escritorio Estándar (>= 992px) */
-        @media (min-width: 992px) {
-            body {
-                padding: 2rem;
-            }
-            header {
-                flex-direction: row;
-                justify-content: space-between;
-                align-items: center;
-            }
-            header .brand {
-                text-align: left;
-            }
-            header .actions-top {
-                width: auto;
-                display: flex;
-            }
-            header .actions-top .btn {
-                width: auto;
-                padding: 0.6rem 1.2rem;
-            }
-            .dashboard-grid {
-                grid-template-columns: 360px 1fr;
-                align-items: start;
-            }
-        }
-
-        /* Pantallas muy grandes y Smart TVs (>= 1400px) */
-        @media (min-width: 1400px) {
-            .dashboard-grid {
-                grid-template-columns: 420px 1fr;
-                gap: 2.5rem;
-            }
-            h1 { font-size: 2rem; }
-            h2 { font-size: 1.5rem; }
-            th, td { padding: 1rem 1.2rem; font-size: 1rem; }
-            .quick-services {
-                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-                max-height: 550px;
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
@@ -371,20 +12,20 @@
         <header>
             <div class="brand">
                 <h1>Papelería Roger</h1>
-                <p style="color: var(--text-muted); font-size: 0.95rem;">Administración General, Caja y Ventas Rápidas</p>
+                <p class="brand-subtitle">Administración General, Caja y Ventas Rápidas</p>
             </div>
             <div class="actions-top">
-                <button class="btn btn-secondary" onclick="uiManager.exportBackup()">💾 Exportar</button>
-                <button class="btn btn-secondary" onclick="document.getElementById('import-file').click()">📂 Importar</button>
-                <button class="btn btn-success" onclick="uiManager.exportToCSVExcel()">📊 Excel</button>
-                <input type="file" id="import-file" style="display: none;" accept=".json" onchange="uiManager.importBackup(event)">
+                <button class="btn btn-secondary" id="btn-export">💾 Exportar</button>
+                <button class="btn btn-secondary" id="btn-trigger-import">📂 Importar</button>
+                <button class="btn btn-success" id="btn-excel">📊 Excel</button>
+                <input type="file" id="import-file" style="display: none;" accept=".json">
             </div>
         </header>
 
-        <div class="nav-tabs">
-            <button class="tab-btn active" onclick="uiManager.switchTab('tab-inventario', this)">📦 Inventario Principal</button>
-            <button class="tab-btn" onclick="uiManager.switchTab('tab-ventas', this)">🛒 Caja de Ventas</button>
-            <button class="tab-btn" onclick="uiManager.switchTab('tab-caja', this)">💵 Caja Chica y Reportes</button>
+        <div class="nav-tabs" id="main-nav-tabs">
+            <button class="tab-btn active" data-tab="tab-inventario">📦 Inventario Principal</button>
+            <button class="tab-btn" data-tab="tab-ventas">🛒 Caja de Ventas</button>
+            <button class="tab-btn" data-tab="tab-caja">💵 Caja Chica y Reportes</button>
         </div>
 
         <!-- PESTAÑA 1: INVENTARIO PRINCIPAL -->
@@ -432,7 +73,7 @@
                             <input type="number" id="min-stock" min="0" required placeholder="5">
                         </div>
 
-                        <div style="display: flex; gap: 0.5rem;">
+                        <div class="form-actions-row">
                             <button type="submit" class="btn" id="btn-submit">Guardar Artículo</button>
                             <button type="button" class="btn btn-danger" id="btn-cancel" style="display: none;">Cancelar</button>
                         </div>
@@ -474,31 +115,31 @@
             <main class="dashboard-grid">
                 <section class="card">
                     <h2>Accesos Rápidos (Servicios)</h2>
-                    <p style="font-size: 0.85rem; margin-bottom: 0.8rem; color: var(--text-muted);">Añade al ticket con un solo clic:</p>
-                    <div class="quick-services">
-                        <button class="btn-quick" onclick="saleManager.addQuickService('Copias Tamaño Carta B/N', 2.00)">📄 Copia Carta B/N <span>$2.00</span></button>
-                        <button class="btn-quick" onclick="saleManager.addQuickService('Copias Tamaño Oficio B/N', 2.50)">📄 Copia Oficio B/N <span>$2.50</span></button>
-                        <button class="btn-quick" onclick="saleManager.addQuickService('Copia Tamaño Carta Color', 10.00)">🌈 Copia Carta Color <span>$10.00</span></button>
-                        <button class="btn-quick" onclick="saleManager.addQuickService('Copias Tamaño Oficio Color', 12.00)">🌈 Copia Oficio Color <span>$12.00</span></button>
-                        <button class="btn-quick" onclick="saleManager.addQuickService('Impresión Tamaño Carta B/N', 2.00)">🖨️ Imp. Carta B/N <span>$2.00</span></button>
-                        <button class="btn-quick" onclick="saleManager.addQuickService('Impresión Tamaño Carta Color', 10.00)">🌈 Imp. Carta Color <span>$10.00</span></button>
-                        <button class="btn-quick" onclick="saleManager.addQuickService('Impresión Tamaño Oficio Color', 12.00)">🌈 Imp. Oficio Color <span>$12.00</span></button>
-                        <button class="btn-quick" onclick="saleManager.addQuickService('Imp. Carta Couche Opalina/Adhesiva B/N', 20.00)">📄 Imp. Opalina B/N <span>$20.00</span></button>
-                        <button class="btn-quick" onclick="saleManager.addQuickService('Tabloide a Color (Couche/Adhesivo)', 30.00)">📐 Tabloide Color <span>$30.00</span></button>
-                        <button class="btn-quick" onclick="saleManager.addQuickService('Impresión Doble Carta B/N', 15.00)">🖨️ Imp. Doble Carta B/N <span>$15.00</span></button>
-                        <button class="btn-quick" onclick="saleManager.addQuickService('Impresión Doble Carta Color', 20.00)">🌈 Imp. Doble Carta Color <span>$20.00</span></button>
-                        <button class="btn-quick" onclick="saleManager.addQuickService('Sacar CURP', 20.00)">🆔 Sacar CURP <span>$20.00</span></button>
-                        <button class="btn-quick" onclick="saleManager.addQuickService('Sacar otros servicios / Citas', 20.00)">📅 Citas / Otros Serv. <span>$20.00</span></button>
-                        <button class="btn-quick" onclick="saleManager.addQuickService('Escanear documento (c/u)', 6.00)">📑 Escanear Doc <span>$6.00</span></button>
-                        <button class="btn-quick" onclick="saleManager.addQuickService('Consulta Internet', 10.00)">🌐 Consulta Internet <span>$10.00</span></button>
-                        <button class="btn-quick" onclick="saleManager.addQuickService('Elaboración de cartas o documentos', 20.00)">📝 Elaboración Docs <span>$20.00</span></button>
-                        <button class="btn-quick" onclick="saleManager.addQuickService('Elaboración de cualquier trabajo', 60.00)">💻 Elaboración Trabajo <span>$60.00</span></button>
-                        <button class="btn-quick" onclick="saleManager.addQuickService('Hojas Sueltas Bond', 1.00)">📝 Hoja Bond <span>$1.00</span></button>
+                    <p class="section-muted-text">Añade al ticket con un solo clic:</p>
+                    <div class="quick-services" id="quick-services-container">
+                        <button class="btn-quick" data-desc="Copias Tamaño Carta B/N" data-price="2.00">📄 Copia Carta B/N <span>$2.00</span></button>
+                        <button class="btn-quick" data-desc="Copias Tamaño Oficio B/N" data-price="2.50">📄 Copia Oficio B/N <span>$2.50</span></button>
+                        <button class="btn-quick" data-desc="Copia Tamaño Carta Color" data-price="10.00">🌈 Copia Carta Color <span>$10.00</span></button>
+                        <button class="btn-quick" data-desc="Copias Tamaño Oficio Color" data-price="12.00">🌈 Copia Oficio Color <span>$12.00</span></button>
+                        <button class="btn-quick" data-desc="Impresión Tamaño Carta B/N" data-price="2.00">🖨️ Imp. Carta B/N <span>$2.00</span></button>
+                        <button class="btn-quick" data-desc="Impresión Tamaño Carta Color" data-price="10.00">🌈 Imp. Carta Color <span>$10.00</span></button>
+                        <button class="btn-quick" data-desc="Impresión Tamaño Oficio Color" data-price="12.00">🌈 Imp. Oficio Color <span>$12.00</span></button>
+                        <button class="btn-quick" data-desc="Imp. Carta Couche Opalina/Adhesiva B/N" data-price="20.00">📄 Imp. Opalina B/N <span>$20.00</span></button>
+                        <button class="btn-quick" data-desc="Tabloide a Color (Couche/Adhesivo)" data-price="30.00">📐 Tabloide Color <span>$30.00</span></button>
+                        <button class="btn-quick" data-desc="Impresión Doble Carta B/N" data-price="15.00">🖨️ Imp. Doble Carta B/N <span>$15.00</span></button>
+                        <button class="btn-quick" data-desc="Impresión Doble Carta Color" data-price="20.00">🌈 Imp. Doble Carta Color <span>$20.00</span></button>
+                        <button class="btn-quick" data-desc="Sacar CURP" data-price="20.00">🆔 Sacar CURP <span>$20.00</span></button>
+                        <button class="btn-quick" data-desc="Sacar otros servicios / Citas" data-price="20.00">📅 Citas / Otros Serv. <span>$20.00</span></button>
+                        <button class="btn-quick" data-desc="Escanear documento (c/u)" data-price="6.00">📑 Escanear Doc <span>$6.00</span></button>
+                        <button class="btn-quick" data-desc="Consulta Internet" data-price="10.00">🌐 Consulta Internet <span>$10.00</span></button>
+                        <button class="btn-quick" data-desc="Elaboración de cartas o documentos" data-price="20.00">📝 Elaboración Docs <span>$20.00</span></button>
+                        <button class="btn-quick" data-desc="Elaboración de cualquier trabajo" data-price="60.00">💻 Elaboración Trabajo <span>$60.00</span></button>
+                        <button class="btn-quick" data-desc="Hojas Sueltas Bond" data-price="1.00">📝 Hoja Bond <span>$1.00</span></button>
                     </div>
 
-                    <div class="form-group" style="margin-top: 1.5rem;">
+                    <div class="form-group style-search-box">
                         <label for="search-sale-input">Buscar Artículo de Inventario</label>
-                        <input type="text" id="search-sale-input" placeholder="Escribe el nombre del artículo..." oninput="saleManager.searchProduct(this.value)">
+                        <input type="text" id="search-sale-input" placeholder="Escribe el nombre del artículo...">
                         <div id="sale-search-results" style="background: white; border: 1px solid var(--border); border-radius: 4px; max-height: 150px; overflow-y: auto; display: none;"></div>
                     </div>
                 </section>
@@ -521,20 +162,20 @@
                     </div>
 
                     <div class="cart-box">
-                        <div style="display: flex; justify-content: space-between; font-size: 1.3rem; font-weight: bold; margin-bottom: 1rem;">
+                        <div class="cart-grand-row">
                             <span>Total a Cobrar:</span>
-                            <span id="cart-grand-total" style="color: var(--success);">$0.00</span>
+                            <span id="cart-grand-total">$0.00</span>
                         </div>
                         <div class="form-group">
                             <label>¿Con cuánto paga el cliente?</label>
-                            <input type="number" id="cash-received" placeholder="0.00" oninput="saleManager.calculateChange()">
+                            <input type="number" id="cash-received" placeholder="0.00">
                         </div>
-                        <div style="display: flex; justify-content: space-between; font-size: 1.1rem; font-weight: bold;">
+                        <div class="cart-change-row">
                             <span>Cambio:</span>
-                            <span id="cash-change" style="color: var(--warning);">$0.00</span>
+                            <span id="cash-change">$0.00</span>
                         </div>
                     </div>
-                    <button class="btn btn-success" style="margin-top: 1rem;" onclick="saleManager.processCheckout()">⚡ Finalizar y Cobrar Venta</button>
+                    <button class="btn btn-success checkout-btn" id="btn-checkout">⚡ Finalizar y Cobrar Venta</button>
                 </section>
             </main>
         </div>
@@ -547,16 +188,16 @@
                         <h2>Fondo Inicial de Caja</h2>
                         <div class="form-group">
                             <label for="caja-inicial-input">¿Con cuánto dinero abres la caja hoy?</label>
-                            <div style="display: flex; gap: 0.5rem;">
+                            <div class="inline-input-group">
                                 <input type="number" id="caja-inicial-input" step="1" min="0" placeholder="Ej. 200" value="0">
-                                <button class="btn" style="width: auto; padding: 0.75rem 1.5rem;" onclick="cajaManager.actualizarFondoInicial()">Fijar</button>
+                                <button class="btn inline-btn" id="btn-set-caja-inicial">Fijar</button>
                             </div>
                         </div>
                     </section>
 
                     <section class="card">
                         <h2>Registro de Gastos Diarios</h2>
-                        <form id="expense-form" onsubmit="cajaManager.saveExpense(event)">
+                        <form id="expense-form">
                             <div class="form-group">
                                 <label for="expense-desc">Descripción del Gasto</label>
                                 <input type="text" id="expense-desc" required placeholder="Ej. Bolsas plásticas, Luz, Limpieza">
@@ -571,7 +212,7 @@
 
                     <section class="card">
                         <h2>Registrar Persona que pide Fiado</h2>
-                        <form id="credit-form" onsubmit="creditManager.saveCredit(event)">
+                        <form id="credit-form">
                             <div class="form-group">
                                 <label for="credit-name">Nombre del Cliente</label>
                                 <input type="text" id="credit-name" required placeholder="Ej. Vecina María, Juan Escolar">
@@ -584,7 +225,7 @@
                                 <label for="credit-amount">Total a Deber ($)</label>
                                 <input type="number" id="credit-amount" step="0.01" required placeholder="0.00">
                             </div>
-                            <button type="submit" class="btn" style="background-color: var(--warning)">⚠️ Registrar Cuenta Pendiente</button>
+                            <button type="submit" class="btn credit-submit-btn">⚠️ Registrar Cuenta Pendiente</button>
                         </form>
                     </section>
                 </div>
@@ -593,24 +234,24 @@
                     <section class="card">
                         <h2>📊 Corte de Caja Diario</h2>
                         <div class="corte-grid">
-                            <div class="corte-card" style="border-left: 4px solid var(--text-muted);">
-                                <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: bold;">( ) INICIAL</span>
-                                <h3 id="corte-inicial" style="font-size: 1.2rem; color: var(--text-main);">$0.00</h3>
+                            <div class="corte-card border-card-muted">
+                                <span class="corte-card-title">( ) INICIAL</span>
+                                <h3 id="corte-inicial">$0.00</h3>
                             </div>
-                            <div class="corte-card" style="background: #ebf8ff; border-left: 4px solid var(--primary);">
-                                <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: bold;">(+) VENTAS</span>
-                                <h3 id="corte-ingresos" style="font-size: 1.2rem; color: var(--primary);">$0.00</h3>
+                            <div class="corte-card border-card-primary">
+                                <span class="corte-card-title">(+) VENTAS</span>
+                                <h3 id="corte-ingresos">$0.00</h3>
                             </div>
-                            <div class="corte-card" style="background: #fff5f5; border-left: 4px solid var(--danger);">
-                                <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: bold;">(-) GASTOS</span>
-                                <h3 id="corte-gastos" style="font-size: 1.2rem; color: var(--danger);">$0.00</h3>
+                            <div class="corte-card border-card-danger">
+                                <span class="corte-card-title">(-) GASTOS</span>
+                                <h3 id="corte-gastos">$0.00</h3>
                             </div>
-                            <div class="corte-card" style="background: #f0fff4; border-left: 4px solid var(--success);">
-                                <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: bold;">(=) TOTAL</span>
-                                <h3 id="corte-balance" style="font-size: 1.2rem; color: var(--success);">$0.00</h3>
+                            <div class="corte-card border-card-success">
+                                <span class="corte-card-title">(=) TOTAL</span>
+                                <h3 id="corte-balance">$0.00</h3>
                             </div>
                         </div>
-                        <h3 style="margin-bottom: 0.5rem;">Movimientos de Hoy</h3>
+                        <h3 class="movements-title">Movimientos de Hoy</h3>
                         <div class="table-container">
                             <table>
                                 <thead>
@@ -650,487 +291,6 @@
 
     <div id="toast" class="toast"></div>
 
-    <script>
-        // Toda la lógica de JavaScript e IndexedDB se mantiene idéntica y completamente funcional
-        const DB_NAME = 'PapeleriaRogerDB';
-        const DB_VERSION = 3; 
-        let db;
-
-        const dbCore = {
-            init() {
-                return new Promise((resolve, reject) => {
-                    const request = indexedDB.open(DB_NAME, DB_VERSION);
-                    request.onerror = () => reject('Error abriendo base de datos.');
-                    request.onsuccess = (e) => { db = e.target.result; resolve(); };
-                    request.onupgradeneeded = (e) => {
-                        const database = e.target.result;
-                        if (!database.objectStoreNames.contains('articulos')) {
-                            database.createObjectStore('articulos', { keyPath: 'barcode' });
-                        }
-                        if (!database.objectStoreNames.contains('ventas')) {
-                            database.createObjectStore('ventas', { keyPath: 'id', autoIncrement: true });
-                        }
-                        if (!database.objectStoreNames.contains('gastos')) {
-                            database.createObjectStore('gastos', { keyPath: 'id', autoIncrement: true });
-                        }
-                        if (!database.objectStoreNames.contains('creditos')) {
-                            database.createObjectStore('creditos', { keyPath: 'id', autoIncrement: true });
-                        }
-                    };
-                });
-            },
-            getAll(storeName) {
-                return new Promise((resolve) => {
-                    const transaction = db.transaction([storeName], 'readonly');
-                    const store = transaction.objectStore(storeName);
-                    const request = store.getAll();
-                    request.onsuccess = () => resolve(request.result);
-                });
-            },
-            save(storeName, item) {
-                return new Promise((resolve) => {
-                    const transaction = db.transaction([storeName], 'readwrite');
-                    const store = transaction.objectStore(storeName);
-                    store.put(item).onsuccess = () => resolve();
-                });
-            },
-            delete(storeName, key) {
-                return new Promise((resolve) => {
-                    const transaction = db.transaction([storeName], 'readwrite');
-                    transaction.objectStore(storeName).delete(key).onsuccess = () => resolve();
-                });
-            }
-        };
-
-        const uiManager = {
-            form: document.getElementById('product-form'),
-            tableBody: document.getElementById('inventory-table-body'),
-            searchInput: document.getElementById('search-input'),
-            filterStock: document.getElementById('filter-stock'),
-            toastElement: document.getElementById('toast'),
-            cachedItems: [],
-
-            init() {
-                this.form.addEventListener('submit', (e) => this.handleSubmit(e));
-                this.searchInput.addEventListener('input', () => this.renderTable());
-                this.filterStock.addEventListener('change', () => this.renderTable());
-                document.getElementById('btn-cancel').addEventListener('click', () => this.resetForm());
-                
-                const savedFondo = localStorage.getItem('fondo_inicial_roger') || "0";
-                document.getElementById('caja-inicial-input').value = savedFondo;
-
-                this.refreshData();
-            },
-
-            switchTab(tabId, btn) {
-                document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-                document.getElementById(tabId).classList.add('active');
-                btn.classList.add('active');
-                if(tabId === 'tab-caja') {
-                    cajaManager.renderCorte();
-                    creditManager.renderCredits();
-                }
-            },
-
-            showToast(message, isError = false) {
-                this.toastElement.textContent = message;
-                this.toastElement.style.borderLeft = isError ? '4px solid var(--danger)' : '4px solid var(--success)';
-                this.toastElement.classList.add('show');
-                setTimeout(() => this.toastElement.classList.remove('show'), 3000);
-            },
-
-            async refreshData() {
-                this.cachedItems = await dbCore.getAll('articulos');
-                this.renderTable();
-            },
-
-            escapeHTML(str) {
-                return String(str).replace(/[&<>"']/g, (m) => {
-                    const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#x27;' };
-                    return map[m];
-                });
-            },
-
-            renderTable() {
-                const query = this.searchInput.value.toLowerCase().trim();
-                const stockFilter = this.filterStock.value;
-                let html = '';
-
-                const filtered = this.cachedItems.filter(item => {
-                    const matchesSearch = item.name.toLowerCase().includes(query) || 
-                                          item.barcode.toLowerCase().includes(query) || 
-                                          item.category.toLowerCase().includes(query);
-                    const isLowStock = item.stock <= item.minStock;
-                    const isOut = item.stock === 0;
-
-                    if(stockFilter === 'low') return matchesSearch && isLowStock;
-                    if(stockFilter === 'resurtir') return matchesSearch && isOut;
-                    return matchesSearch;
-                });
-
-                if (filtered.length === 0) {
-                    this.tableBody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--text-muted);">No se encontraron artículos.</td></tr>`;
-                    return;
-                }
-
-                filtered.forEach(item => {
-                    let stockClass = 'stock-normal';
-                    if (item.stock === 0) stockClass = 'stock-empty';
-                    else if (item.stock <= item.minStock) stockClass = 'stock-low';
-
-                    html += `
-                        <tr>
-                            <td><code>${this.escapeHTML(item.barcode)}</code></td>
-                            <td><strong>${this.escapeHTML(item.name)}</strong></td>
-                            <td>${this.escapeHTML(item.category)}</td>
-                            <td>$${Number(item.price).toFixed(2)}</td>
-                            <td><span class="stock-badge ${stockClass}">${item.stock} pz</span></td>
-                            <td class="actions">
-                                <button class="btn btn-action" onclick="uiManager.loadEdit('${item.barcode}')">Editar</button>
-                                <button class="btn btn-danger btn-action" onclick="uiManager.handleDelete('${item.barcode}')">Eliminar</button>
-                            </td>
-                        </tr>
-                    `;
-                });
-                this.tableBody.innerHTML = html;
-            },
-
-            async handleSubmit(e) {
-                e.preventDefault();
-                if (!this.form.checkValidity()) {
-                    this.showToast('Por favor, llena todos los campos correctamente.', true);
-                    return;
-                }
-
-                let barcodeVal = document.getElementById('barcode').value.trim();
-                if (!barcodeVal) {
-                    barcodeVal = 'ART-' + Math.floor(1000 + Math.random() * 9000);
-                }
-
-                const item = {
-                    barcode: barcodeVal,
-                    name: document.getElementById('name').value.trim(),
-                    category: document.getElementById('category').value,
-                    price: parseFloat(document.getElementById('price').value),
-                    stock: parseInt(document.getElementById('stock').value, 10),
-                    minStock: parseInt(document.getElementById('min-stock').value, 10)
-                };
-
-                await dbCore.save('articulos', item);
-                this.showToast('Artículo guardado correctamente');
-                this.resetForm();
-                this.refreshData();
-            },
-
-            loadEdit(barcode) {
-                const item = this.cachedItems.find(i => i.barcode === barcode);
-                if (!item) return;
-                document.getElementById('product-id').value = item.barcode;
-                document.getElementById('barcode').value = item.barcode;
-                document.getElementById('barcode').disabled = true; 
-                document.getElementById('name').value = item.name;
-                document.getElementById('category').value = item.category;
-                document.getElementById('price').value = item.price;
-                document.getElementById('stock').value = item.stock;
-                document.getElementById('min-stock').value = item.minStock;
-                document.getElementById('form-title').textContent = 'Editar Artículo';
-                document.getElementById('btn-cancel').style.display = 'inline-block';
-            },
-
-            resetForm() {
-                this.form.reset();
-                document.getElementById('product-id').value = '';
-                document.getElementById('barcode').disabled = false;
-                document.getElementById('form-title').textContent = 'Agregar Nuevo Artículo';
-                document.getElementById('btn-cancel').style.display = 'none';
-            },
-
-            async handleDelete(barcode) {
-                if (confirm('¿Estás seguro de que deseas eliminar este artículo?')) {
-                    await dbCore.delete('articulos', barcode);
-                    this.showToast('Artículo eliminado.');
-                    this.refreshData();
-                }
-            },
-
-            exportBackup() {
-                const blob = new Blob([JSON.stringify(this.cachedItems, null, 2)], { type: 'application/json' });
-                const a = document.createElement('a');
-                a.href = URL.createObjectURL(blob);
-                a.download = `Respaldo_Roger.json`;
-                a.click();
-            },
-
-            importBackup(event) {
-                const file = event.target.files[0];
-                if (!file) return;
-                const reader = new FileReader();
-                reader.onload = async (e) => {
-                    try {
-                        const items = JSON.parse(e.target.result);
-                        for (const item of items) { if(item.barcode) await dbCore.save('articulos', item); }
-                        this.showToast('Inventario restaurado.');
-                        this.refreshData();
-                    } catch { this.showToast('Archivo no válido.', true); }
-                };
-                reader.readAsText(file);
-            },
-
-            exportToCSVExcel() {
-                let csv = "\uFEFFCódigo,Nombre,Categoría,Precio,Existencia,Valor total\n";
-                this.cachedItems.forEach(i => { csv += `"${i.barcode}","${i.name}",${i.category},${i.price},${i.stock},${i.price*i.stock}\n`; });
-                const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-                const a = document.createElement('a');
-                a.href = URL.createObjectURL(blob);
-                a.download = `Reporte_Inventario.csv`;
-                a.click();
-            }
-        };
-
-        const saleManager = {
-            cart: [],
-
-            addQuickService(description, price) {
-                this.cart.push({ barcode: 'SRV-' + Date.now(), name: description, price: price, qty: 1, isService: true });
-                this.renderCart();
-            },
-
-            searchProduct(query) {
-                const container = document.getElementById('sale-search-results');
-                if (!query.trim()) { container.style.display = 'none'; return; }
-                
-                const matches = uiManager.cachedItems.filter(i => i.name.toLowerCase().includes(query.toLowerCase())).slice(0, 5);
-                if (matches.length === 0) { container.innerHTML = '<p style="padding:0.5rem; color:gray;">Sin resultados</p>'; container.style.display = 'block'; return; }
-
-                container.innerHTML = matches.map(m => `
-                    <div style="padding:0.6rem; cursor:pointer; border-bottom:1px solid #eee;" onclick="saleManager.addProductFromSearch('${m.barcode}')">
-                        🎯 <strong>${m.name}</strong> - $${m.price.toFixed(2)} (${m.stock} disp.)
-                    </div>
-                `).join('');
-                container.style.display = 'block';
-            },
-
-            addProductFromSearch(barcode) {
-                const item = uiManager.cachedItems.find(i => i.barcode === barcode);
-                if (!item) return;
-
-                const exist = this.cart.find(c => c.barcode === barcode);
-                if (exist) { exist.qty++; } else { this.cart.push({ barcode: item.barcode, name: item.name, price: item.price, qty: 1, isService: false }); }
-                
-                document.getElementById('search-sale-input').value = '';
-                document.getElementById('sale-search-results').style.display = 'none';
-                this.renderCart();
-            },
-
-            updateCartQty(index, val) {
-                const qty = parseInt(val, 10);
-                if (qty <= 0) { this.cart.splice(index, 1); } else { this.cart[index].qty = qty; }
-                this.renderCart();
-            },
-
-            renderCart() {
-                const tbody = document.getElementById('cart-table-body');
-                let total = 0;
-                tbody.innerHTML = this.cart.map((item, idx) => {
-                    const subtotal = item.price * item.qty;
-                    total += subtotal;
-                    return `
-                        <tr>
-                            <td>${item.name}</td>
-                            <td>$${item.price.toFixed(2)}</td>
-                            <td><input type="number" value="${item.qty}" min="0" style="width:60px; padding:0.2rem;" onchange="saleManager.updateCartQty(${idx}, this.value)"></td>
-                            <td>$${subtotal.toFixed(2)}</td>
-                            <td><button class="btn btn-danger btn-action" onclick="saleManager.updateCartQty(${idx}, 0)">❌</button></td>
-                        </tr>
-                    `;
-                }).join('');
-                document.getElementById('cart-grand-total').textContent = `$${total.toFixed(2)}`;
-                this.calculateChange();
-            },
-
-            calculateChange() {
-                const total = this.cart.reduce((acc, i) => acc + (i.price * i.qty), 0);
-                const received = parseFloat(document.getElementById('cash-received').value) || 0;
-                const change = received - total;
-                document.getElementById('cash-change').textContent = change >= 0 ? `$${change.toFixed(2)}` : '$0.00';
-            },
-
-            async processCheckout() {
-                if (this.cart.length === 0) return uiManager.showToast('La nota está vacía.', true);
-
-                let totalVenta = 0;
-                for (let item of this.cart) {
-                    totalVenta += item.price * item.qty;
-                    if (!item.isService) {
-                        const invItem = uiManager.cachedItems.find(i => i.barcode === item.barcode);
-                        if (invItem) {
-                            invItem.stock = Math.max(0, invItem.stock - item.qty);
-                            await dbCore.save('articulos', invItem);
-                        }
-                    }
-                }
-
-                await dbCore.save('ventas', { date: new Date().toISOString(), total: totalVenta, itemsCount: this.cart.length });
-                
-                uiManager.showToast('Venta cobrada e inventario descontado.');
-                this.cart = [];
-                document.getElementById('cash-received').value = '';
-                this.renderCart();
-                uiManager.refreshData();
-            }
-        };
-
-        const cajaManager = {
-            actualizarFondoInicial() {
-                const val = parseFloat(document.getElementById('caja-inicial-input').value) || 0;
-                localStorage.setItem('fondo_inicial_roger', val);
-                uiManager.showToast('Fondo inicial guardado con éxito.');
-                this.renderCorte();
-            },
-
-            async saveExpense(e) {
-                e.preventDefault();
-                const desc = document.getElementById('expense-desc').value.trim();
-                const amount = parseFloat(document.getElementById('expense-amount').value) || 0;
-
-                if (!desc || amount <= 0) return;
-
-                await dbCore.save('gastos', { date: new Date().toISOString(), description: desc, total: amount });
-                uiManager.showToast('Salida de dinero registrada.');
-                document.getElementById('expense-form').reset();
-                this.renderCorte();
-            },
-
-            async eliminarMovimiento(storeName, id) {
-                if(confirm('¿Deseas eliminar este registro de los reportes de hoy?')) {
-                    await dbCore.delete(storeName, id);
-                    uiManager.showToast('Registro eliminado.');
-                    this.renderCorte();
-                }
-            },
-
-            async renderCorte() {
-                const ventas = await dbCore.getAll('ventas');
-                const gastos = await dbCore.getAll('gastos');
-                const hoyStr = new Date().toISOString().slice(0, 10);
-
-                const ventasHoy = ventas.filter(v => v.date.startsWith(hoyStr));
-                const gastosHoy = gastos.filter(g => g.date.startsWith(hoyStr));
-
-                const fondoInicial = parseFloat(localStorage.getItem('fondo_inicial_roger')) || 0;
-                const totalIngresos = ventasHoy.reduce((acc, v) => acc + v.total, 0);
-                const totalGastos = gastosHoy.reduce((acc, g) => acc + g.total, 0);
-
-                const balanceTotal = fondoInicial + totalIngresos - totalGastos;
-
-                document.getElementById('corte-inicial').textContent = `$${fondoInicial.toFixed(2)}`;
-                document.getElementById('corte-ingresos').textContent = `$${totalIngresos.toFixed(2)}`;
-                document.getElementById('corte-gastos').textContent = `$${totalGastos.toFixed(2)}`;
-                
-                const balanceElement = document.getElementById('corte-balance');
-                balanceElement.textContent = `$${balanceTotal.toFixed(2)}`;
-                balanceElement.style.color = balanceTotal >= 0 ? 'var(--success)' : 'var(--danger)';
-
-                const tbody = document.getElementById('corte-table-body');
-                let html = '';
-
-                ventasHoy.forEach(v => {
-                    html += `<tr>
-                        <td>${new Date(v.date).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</td>
-                        <td style="color:var(--success); font-weight:bold;">VENTA</td>
-                        <td>${v.concept ? uiManager.escapeHTML(v.concept) : 'Nota de venta de ('+v.itemsCount+' art.)'}</td>
-                        <td style="color:var(--success); font-weight:bold;">+$${v.total.toFixed(2)}</td>
-                        <td><button class="btn btn-danger btn-action" onclick="cajaManager.eliminarMovimiento('ventas', ${v.id})">❌ Borrar</button></td>
-                    </tr>`;
-                });
-
-                gastosHoy.forEach(g => {
-                    html += `<tr>
-                        <td>${new Date(g.date).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</td>
-                        <td style="color:var(--danger); font-weight:bold;">GASTO</td>
-                        <td>${uiManager.escapeHTML(g.description)}</td>
-                        <td style="color:var(--danger); font-weight:bold;">-$${g.total.toFixed(2)}</td>
-                        <td><button class="btn btn-danger btn-action" onclick="cajaManager.eliminarMovimiento('gastos', ${g.id})">❌ Borrar</button></td>
-                    </tr>`;
-                });
-
-                tbody.innerHTML = html || '<tr><td colspan="5" style="text-align:center; color:gray;">Sin movimientos el día de hoy.</td></tr>';
-            }
-        };
-
-        const creditManager = {
-            async saveCredit(e) {
-                e.preventDefault();
-                const name = document.getElementById('credit-name').value.trim();
-                const desc = document.getElementById('credit-desc').value.trim();
-                const amount = parseFloat(document.getElementById('credit-amount').value) || 0;
-
-                if (!name || !desc || amount <= 0) return;
-
-                const creditItem = { name, description: desc, total: amount, date: new Date().toISOString() };
-                await dbCore.save('creditos', creditItem);
-                
-                uiManager.showToast('Cuenta de fiado guardada correctamente.');
-                document.getElementById('credit-form').reset();
-                this.renderCredits();
-            },
-
-            async renderCredits() {
-                const list = await dbCore.getAll('creditos');
-                const tbody = document.getElementById('credit-table-body');
-
-                if (list.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:gray;">No hay deudores pendientes 🎉</td></tr>';
-                    return;
-                }
-
-                tbody.innerHTML = list.map(c => `
-                    <tr>
-                        <td><strong>${uiManager.escapeHTML(c.name)}</strong></td>
-                        <td>${uiManager.escapeHTML(c.description)}</td>
-                        <td style="color: var(--warning); font-weight: bold;">$${c.total.toFixed(2)}</td>
-                        <td>
-                            <button class="btn btn-success btn-action" onclick="creditManager.liquidarCredito(${c.id}, '${uiManager.escapeHTML(c.name)}', ${c.total})">✔ Liquidar</button>
-                            <button class="btn btn-danger btn-action" onclick="creditManager.borrarCredito(${c.id})">❌</button>
-                        </td>
-                    </tr>
-                `).join('');
-            },
-
-            async liquidarCredito(id, name, total) {
-                if (confirm(`¿Confirmas que ${name} ya pagó la cantidad de $${total.toFixed(2)}?`)) {
-                    await dbCore.save('ventas', {
-                        date: new Date().toISOString(),
-                        total: total,
-                        concept: `Pago de deuda - ${name}`,
-                        itemsCount: 1
-                    });
-                    await dbCore.delete('creditos', id);
-                    uiManager.showToast('¡Cuenta pagada! El dinero entró a caja.');
-                    this.renderCredits();
-                    cajaManager.renderCorte();
-                }
-            },
-
-            async borrarCredito(id) {
-                if (confirm('¿Eliminar esta cuenta sin cobrarla? (Cancelación)')) {
-                    await dbCore.delete('creditos', id);
-                    uiManager.showToast('Cuenta eliminada.');
-                    this.renderCredits();
-                }
-            }
-        };
-
-        document.addEventListener('DOMContentLoaded', async () => {
-            try {
-                await dbCore.init();
-                uiManager.init();
-                saleManager.renderCart();
-            } catch (error) {
-                alert('No se pudo inicializar la aplicación de forma segura: ' + error);
-            }
-        });
-    </script>
+    <script src="app.js"></script>
 </body>
 </html>
