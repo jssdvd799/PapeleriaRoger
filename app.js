@@ -35,23 +35,24 @@ class DatabaseService {
         
         if (error) { console.error(error); return []; }
         
-        // Mapeamos los nombres de columnas de Supabase a los objetos de tu UI
+        // Mapeamos los nombres de columnas de Supabase a los objetos de tu UI de forma dinámica
         return data.map(row => ({
-            barcode: row.id.toString(), // Usamos el ID de la base de datos como código
-            name: row.nombre,
-            category: "Papelería", // Valor por defecto
-            price: parseFloat(row.precio),
-            stock: parseInt(row.cantidad, 10),
-            minStock: 5 // Control interno local
+            barcode: row.id ? row.id.toString() : Date.now().toString(), // Usamos el ID de la base de datos como código
+            name: row.nombre || '',
+            category: row.categoria || 'Otros', // Lee la categoría real de la BD para no romper los filtros
+            price: parseFloat(row.precio) || 0,
+            stock: parseInt(row.cantidad, 10) || 0,
+            minStock: parseInt(row.min_stock, 10) || 5 // Control interno local / Supabase
         }));
     }
 
     async saveItem(item) {
-        // Estructuramos el objeto tal cual lo pide la tabla en Supabase
+        // Estructuramos el objeto tal cual lo pide la tabla en Supabase incluyendo la categoría
         const dbRow = {
             nombre: item.name,
             precio: item.price,
-            cantidad: item.stock
+            cantidad: item.stock,
+            categoria: item.category
         };
 
         // Si el código es numérico, significa que estamos editando una fila existente
