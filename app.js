@@ -3,26 +3,18 @@
  */
 
 // 1. DATA ACCESS LAYER (Conexión Directa a la Nube)
-// Pon tus llaves de conexión obtenidas en el panel aquí:
 const SUPABASE_URL = "https://oxrzpgeifttrzznxxmjl.supabase.co"; 
 const SUPABASE_ANON_KEY = "sb_publishable_tCQX-_fg3E7YBvOOZK3jgA_ynKHe-SR"; 
 
-import { createClient } from '@supabase/supabase-js'
-const supabaseUrl = 'https://oxrzpgeifttrzznxxmjl.supabase.co'
-const supabaseKey = process.env.SUPABASE_KEY
-const supabase = createClient(supabaseUrl, supabaseKey)
-
-// Inicializar cliente global de Supabase (requiere el script en tu HTML)
+// Inicializar cliente global utilizando la librería cargada desde el CDN del HTML
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 class DatabaseService {
     constructor() {
-        // Mantenemos la estructura para no romper la compatibilidad con las otras capas
         this.db = supabaseClient;
     }
 
     async connect() {
-        // En Supabase la conexión es HTTP directa, así que verificamos acceso básico
         try {
             const { data, error } = await this.db.from('inventario').select('count', { count: 'exact', head: true });
             if (error) throw error;
@@ -87,7 +79,6 @@ class DatabaseService {
     }
 
     // --- MANTENIMIENTO LOCAL MEDIANTE LOCALSTORAGE PARA FLUJO DE CAJA Y FIADOS ---
-    // (Para no alterar las otras tablas de gastos/créditos locales por ahora)
     async getAll(storeName) {
         return JSON.parse(localStorage.getItem(`roger_local_${storeName}`)) || [];
     }
@@ -277,7 +268,7 @@ class AppEngine {
             this.renderCreditsTable();
         });
 
-        // Import / Export Lógica Local Reutilizada
+        // Import / Export Lógica Local
         document.getElementById('btn-export').addEventListener('click', () => {
             const blob = new Blob([JSON.stringify(this.cachedItems, null, 2)], { type: 'application/json' });
             const a = document.createElement('a');
@@ -352,7 +343,7 @@ class AppEngine {
     loadEdit(barcode) {
         const item = this.cachedItems.find(i => i.barcode === barcode);
         if (!item) return;
-        document.getElementById('product-id').value = item.barcode; // Guardamos el ID real de Supabase
+        document.getElementById('product-id').value = item.barcode;
         document.getElementById('barcode').value = `ID-${item.barcode}`;
         document.getElementById('barcode').disabled = true; 
         document.getElementById('name').value = item.name;
@@ -411,7 +402,7 @@ class AppEngine {
                 const stockItem = this.cachedItems.find(i => i.barcode === item.barcode);
                 if (stockItem) {
                     stockItem.stock = Math.max(0, stockItem.stock - item.qty);
-                    await this.inventory.persistItem(stockItem); // Actualiza stock directo en Supabase
+                    await this.inventory.persistItem(stockItem); 
                 }
             }
         }
@@ -498,7 +489,7 @@ class AppEngine {
 
     toast(msg, isError = false) {
         const el = document.getElementById('toast');
-        if(!el) return alert(msg); // Fallback por si no encuentra el contenedor en el DOM
+        if(!el) return alert(msg);
         el.textContent = msg;
         el.style.borderLeft = isError ? '4px solid var(--danger)' : '4px solid var(--success)';
         el.classList.add('show');
@@ -510,7 +501,7 @@ class AppEngine {
     }
 }
 
-// 4. MAIN APPLICATION ENTRY POINT (Arranque protegido de la App)
+// 4. MAIN APPLICATION ENTRY POINT
 document.addEventListener('DOMContentLoaded', () => {
     const app = new AppEngine();
     app.bootstrap();
